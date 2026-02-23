@@ -1,0 +1,63 @@
+{
+  "name": "ovs-scenario-editor",
+  "version": "1.0.0",
+  "description": "OpenVetSim XML Scenario Editor",
+  "main": "main.js",
+  "author": "OpenVetSim",
+  "license": "MIT",
+  "scripts": {
+    "start":    "electron .",
+    "dist":     "electron-builder",
+    "dist-mac": "electron-builder --mac",
+    "dist-win": "electron-builder --win"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^4.3.6",
+    "vis-data":        "^7.1.9",
+    "vis-network":     "^9.1.9"
+  },
+  "devDependencies": {
+    "electron":         "^29.1.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId":       "com.openvetsim.editor",
+    "productName": "OVS Scenario Editor",
+    "asar":        true,
+
+    "files": [
+      "main.js",
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/**/*",
+      "!node_modules/.cache/**",
+      "!node_modules/electron/dist/**",
+      "!node_modules/electron-builder/**"
+    ],
+
+    "directories": {
+      "output": "dist"
+    },
+
+    "mac": {
+      "category": "public.app-category.education",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] }
+      ]
+    },
+
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+
+    "nsis": {
+      "oneClick":                       false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut":          true,
+      "createStartMenuShortcut":        true,
+      "shortcutName":                   "OVS Scenario Editor"
+    }
+  }
+}

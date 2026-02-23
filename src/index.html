@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OVS Scenario Editor</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- vis-network standalone UMD (creates global `vis`) -->
+  <script src="../node_modules/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ══ Top bar ══════════════════════════════════════════════════════════════ -->
+  <header id="topbar">
+    <div id="topbar-left">
+      <div id="logo">OVS <span>Editor</span></div>
+      <button id="btn-new"  class="tb-btn">⊕ New</button>
+      <button id="btn-open" class="tb-btn">📂 Open</button>
+      <button id="btn-save" class="tb-btn tb-save">💾 Save</button>
+    </div>
+
+    <nav id="tab-nav">
+      <button class="tab-btn active" data-tab="flowchart">🗺 Flowchart</button>
+      <button class="tab-btn"        data-tab="header">📋 Scenario Info</button>
+      <button class="tab-btn"        data-tab="events">⚡ Events</button>
+    </nav>
+
+    <div id="topbar-right">
+      <span id="scene-count">0 scenes</span>
+    </div>
+  </header>
+
+  <!-- ══ Tab panels ═══════════════════════════════════════════════════════════ -->
+
+  <!-- ── Flowchart tab ─────────────────────────────────────────────────────── -->
+  <div id="tab-flowchart" class="tab-panel active">
+
+    <div id="fc-toolbar">
+      <button id="btn-add-scene" class="tb-btn tb-accent">＋ Add Scene</button>
+      <button id="btn-fit"       class="tb-btn">⤢ Fit Graph</button>
+      <span class="fc-hint">
+        Click node to edit &nbsp;·&nbsp; Right-click for options &nbsp;·&nbsp; Drag to reposition
+      </span>
+      <div id="fc-legend">
+        <span class="legend-dot" style="background:#dcfce7;border:1.5px solid #4ade80"></span> Initial
+        <span class="legend-dot" style="background:#dbeafe;border:1.5px solid #93c5fd"></span> Normal
+        <span class="legend-dot" style="background:#fee2e2;border:1.5px solid #f87171"></span> Terminal
+        <span class="legend-dash"></span> Timeout
+      </div>
+    </div>
+
+    <div id="fc-body">
+      <!-- Graph canvas -->
+      <div id="graph-wrap">
+        <div id="network-canvas"></div>
+        <!-- Empty state -->
+        <div id="canvas-empty">
+          <div class="empty-icon">🐾</div>
+          <h3>No scenario loaded</h3>
+          <p>Click <strong>Open</strong> to load a scenario folder<br/>or <strong>New</strong> to create one from scratch.</p>
+          <div class="empty-btns">
+            <button id="es-open" class="btn-primary">📂 Open Scenario Folder</button>
+            <button id="es-new">⊕ New Scenario</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Side panel (scene editor) -->
+      <aside id="side-panel">
+        <div id="panel-placeholder">
+          <div class="ph-icon">✏️</div>
+          <p>Select a scene node<br/>to edit its properties</p>
+        </div>
+        <div id="scene-editor" style="display:none"></div>
+      </aside>
+    </div>
+  </div><!-- /tab-flowchart -->
+
+  <!-- ── Scenario Info tab ─────────────────────────────────────────────────── -->
+  <div id="tab-header" class="tab-panel">
+    <div class="scroll-area">
+      <div id="header-editor">
+        <div class="empty-page">
+          <p>Open or create a scenario to edit its information.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Events tab ────────────────────────────────────────────────────────── -->
+  <div id="tab-events" class="tab-panel">
+    <div class="scroll-area">
+      <div id="events-editor">
+        <div class="empty-page">
+          <p>Open or create a scenario to edit its events.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Status bar ═══════════════════════════════════════════════════════════ -->
+  <footer id="statusbar">
+    <span id="status-msg">Ready — open a scenario folder to begin.</span>
+    <span id="fp-display"></span>
+  </footer>
+
+</div><!-- /app -->
+
+<script src="renderer.js"></script>
+
+<script>
+  // Wire empty-state buttons
+  document.getElementById('es-open').addEventListener('click', () =>
+    document.getElementById('btn-open').click());
+  document.getElementById('es-new').addEventListener('click', () =>
+    document.getElementById('btn-new').click());
+</script>
+
+</body>
+</html>

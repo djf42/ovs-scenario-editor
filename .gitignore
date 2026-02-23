@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Electron build output
+dist/
+out/
+
+# Scenario files (user data — not part of the app source)
+*.xml
+layout.json
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
