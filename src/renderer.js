@@ -4,8 +4,8 @@
  * Main application controller for the OVS Scenario Editor renderer process.
  */
 
-const { ipcRenderer }       = require('electron');
-const path                  = require('path');
+const { ipcRenderer, shell } = require('electron');
+const path                   = require('path');
 const { parseScenario }     = require('./xmlParser');
 const { serializeScenario } = require('./xmlSerializer');
 const FlowChart    = require('./flowchart');
@@ -44,6 +44,8 @@ document.getElementById('btn-open').addEventListener('click', cmdOpen);
 document.getElementById('btn-save').addEventListener('click', cmdSave);
 document.getElementById('btn-add-scene').addEventListener('click', cmdAddScene);
 document.getElementById('btn-fit').addEventListener('click',  () => flowChart.fit());
+document.getElementById('btn-bug').addEventListener('click',  () =>
+  shell.openExternal('https://forms.gle/VYzjTsFvw3CDSSyz7'));
 
 // ── Menu commands from main process ──────────────────────────────────────────
 
