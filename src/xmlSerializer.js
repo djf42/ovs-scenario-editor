@@ -263,10 +263,10 @@ function serializeTriggerGroup(tg) {
 function serializeCardiac(c) {
   if (!c || !Object.keys(c).length) return [];
   const order = [
-    'rhythm', 'vpc', 'pea', 'vpc_freq', 'vfib_amplitude',
+    'rhythm', 'vpc', 'vpc_freq', 'vfib_amplitude',
     'rate', 'bps_sys', 'bps_dia', 'nibp_rate', 'pulse_strength',
-    'heart_sound', 'heart_sound_volume', 'ecg_indicator', 'bp_cuff', 'arrest',
-    'transfer_time'
+    'heart_sound', 'heart_sound_volume', 'ecg_indicator', 'bp_cuff',
+    'pea', 'arrest', 'transfer_time'
   ];
   return wrapBlock('cardiac', c, order);
 }

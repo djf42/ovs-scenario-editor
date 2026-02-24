@@ -380,7 +380,6 @@ function buildGiCardiacForm(c) {
     ['gi-c-rhythm',       'Rhythm',       'select', c.rhythm,       ['sinus','afib','vfib','vtach1','vtach2','vtach3','asystole']],
     ['gi-c-vpc_waveform', 'VPC Waveform', 'select', vpcP.waveform,  ['none','vtach1','vtach2','vtach3']],
     ['gi-c-vpc_count',    'VPC Count',    'select', vpcP.count,     ['single','couplet','triplet']],
-    ['gi-c-pea',      'PEA',             'select', c.pea,      [{v:0,l:'No'},{v:1,l:'Yes'}]],
     ['gi-c-vpc_freq', 'VPC Freq',        'number', c.vpc_freq],
     ['gi-c-vfib_amplitude', 'VFib Amp',  'select', c.vfib_amplitude, ['low','high']],
     ['gi-c-rate',     'Rate (bpm)',       'number', c.rate],
@@ -392,6 +391,7 @@ function buildGiCardiacForm(c) {
     ['gi-c-heart_sound_volume','Heart Sound Vol (0-10)','number',c.heart_sound_volume],
     ['gi-c-ecg_indicator','ECG Indicator','select',c.ecg_indicator,[{v:0,l:'Off'},{v:1,l:'On'}]],
     ['gi-c-bp_cuff',  'BP Cuff',         'select', c.bp_cuff,  [{v:0,l:'Off'},{v:1,l:'On'}]],
+    ['gi-c-pea',      'PEA',             'select', c.pea,      [{v:0,l:'No'},{v:1,l:'Yes'}]],
     ['gi-c-arrest',       'Cardiac Arrest',  'select', c.arrest,   [{v:0,l:'No'},{v:1,l:'Yes'}]],
     ['gi-c-transfer_time','Transfer Time (s)','number', c.transfer_time]
   ]);
