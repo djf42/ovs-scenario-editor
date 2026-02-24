@@ -241,7 +241,8 @@ function parseTrigger(t) {
 const CARDIAC_FIELDS = [
   'rhythm', 'vpc', 'pea', 'vpc_freq', 'vfib_amplitude',
   'rate', 'bps_sys', 'bps_dia', 'nibp_rate', 'pulse_strength',
-  'heart_sound', 'heart_sound_volume', 'ecg_indicator', 'bp_cuff', 'arrest'
+  'heart_sound', 'heart_sound_volume', 'ecg_indicator', 'bp_cuff', 'arrest',
+  'transfer_time'
 ];
 
 const RESPIRATION_FIELDS = [

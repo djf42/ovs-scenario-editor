@@ -265,7 +265,8 @@ function serializeCardiac(c) {
   const order = [
     'rhythm', 'vpc', 'pea', 'vpc_freq', 'vfib_amplitude',
     'rate', 'bps_sys', 'bps_dia', 'nibp_rate', 'pulse_strength',
-    'heart_sound', 'heart_sound_volume', 'ecg_indicator', 'bp_cuff', 'arrest'
+    'heart_sound', 'heart_sound_volume', 'ecg_indicator', 'bp_cuff', 'arrest',
+    'transfer_time'
   ];
   return wrapBlock('cardiac', c, order);
 }

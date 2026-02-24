@@ -392,7 +392,8 @@ function buildGiCardiacForm(c) {
     ['gi-c-heart_sound_volume','Heart Sound Vol (0-10)','number',c.heart_sound_volume],
     ['gi-c-ecg_indicator','ECG Indicator','select',c.ecg_indicator,[{v:0,l:'Off'},{v:1,l:'On'}]],
     ['gi-c-bp_cuff',  'BP Cuff',         'select', c.bp_cuff,  [{v:0,l:'Off'},{v:1,l:'On'}]],
-    ['gi-c-arrest',   'Cardiac Arrest',  'select', c.arrest,   [{v:0,l:'No'},{v:1,l:'Yes'}]]
+    ['gi-c-arrest',       'Cardiac Arrest',  'select', c.arrest,   [{v:0,l:'No'},{v:1,l:'Yes'}]],
+    ['gi-c-transfer_time','Transfer Time (s)','number', c.transfer_time]
   ]);
 }
 
@@ -440,7 +441,7 @@ function collectGiParams(container, prefix) {
   const paramMap = {
     'gi-c': ['rhythm','vpc_waveform','vpc_count','pea','vpc_freq','vfib_amplitude','rate','bps_sys','bps_dia',
               'nibp_rate','pulse_strength','heart_sound','heart_sound_volume',
-              'ecg_indicator','bp_cuff','arrest'],
+              'ecg_indicator','bp_cuff','arrest','transfer_time'],
     'gi-r': ['left_lung_sound','left_lung_sound_volume','right_lung_sound','right_lung_sound_volume',
               'spo2','spo2_indicator','etco2','etco2_indicator','rate','chest_movement'],
     'gi-g': ['temperature','temperature_enable']
