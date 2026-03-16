@@ -80,7 +80,7 @@ function parseControls(c) {
   return {
     color: str(c.color) || '#000000',
     controls: (c.control || []).map(ctrl => ({
-      title: str(ctrl.title),
+      title: decodeEntities(str(ctrl.title)),
       id:    str(ctrl.id),
       top:   num(ctrl.top),
       left:  num(ctrl.left)
@@ -122,7 +122,7 @@ function parseGlobalInit(i) {
   return {
     cardiac:      parseCardiacFields(i.cardiac),
     respiration:  parseRespirationFields(i.respiration),
-    general:      parseGeneralFields(i.general),
+    general:       parseGeneralFields(i.general),
     initial_scene: num(i.initial_scene, 1),
     record:        num(i.record, 1)
   };
@@ -258,9 +258,12 @@ function pickFields(obj, fields) {
   if (!obj) return {};
   const result = {};
   for (const f of fields) {
-    if (obj[f] !== undefined && obj[f] !== null && obj[f] !== '') {
-      result[f] = obj[f];
-    }
+    let v = obj[f];
+    if (v === undefined || v === null || v === '') continue;
+    // fast-xml-parser can return an array if a tag appears more than once at the
+    // same level (e.g. after a corrupted save). Always take the last value.
+    if (Array.isArray(v)) v = v[v.length - 1];
+    result[f] = v;
   }
   return result;
 }
@@ -274,6 +277,17 @@ function parseGeneralFields(g)     { return pickFields(g, GENERAL_FIELDS); }
 function str(v) {
   if (v === undefined || v === null) return '';
   return String(v);
+}
+
+// fast-xml-parser decodes named entities (&lt; &gt; &amp;) but NOT numeric
+// character references like &#47; (forward slash). OVS-generated XML uses &#47;
+// inside HTML snippets stored as tag text (e.g. SpO&lt;sub&gt;2&lt;&#47;sub&gt;),
+// so we must finish the decode here or esc() will double-escape the ampersand.
+function decodeEntities(s) {
+  if (!s || !String(s).includes('&')) return String(s);
+  return String(s)
+    .replace(/&#x([0-9a-fA-F]+);/gi, (_, hex)  => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g,             (_, dec)  => String.fromCharCode(parseInt(dec, 10)));
 }
 
 function num(v, def = 0) {

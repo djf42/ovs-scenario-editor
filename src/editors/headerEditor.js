@@ -409,6 +409,7 @@ function buildGiRespirationForm(r) {
     ['gi-r-etco2_indicator',  'EtCO₂ Indicator',    'select', r.etco2_indicator,[{v:0,l:'Off'},{v:1,l:'On'}]],
     ['gi-r-rate',             'Rate (bpm)',           'number', r.rate],
     ['gi-r-chest_movement',   'Chest Movement',     'select', r.chest_movement, [{v:0,l:'None'},{v:1,l:'Yes'}]],
+    ['gi-r-transfer_time',    'Transfer Time (s)',   'number', r.transfer_time],
   ]);
 }
 
@@ -443,7 +444,7 @@ function collectGiParams(container, prefix) {
               'nibp_rate','pulse_strength','heart_sound','heart_sound_volume',
               'ecg_indicator','bp_cuff','arrest','transfer_time'],
     'gi-r': ['left_lung_sound','left_lung_sound_volume','right_lung_sound','right_lung_sound_volume',
-              'spo2','spo2_indicator','etco2','etco2_indicator','rate','chest_movement'],
+              'spo2','spo2_indicator','etco2','etco2_indicator','rate','chest_movement','transfer_time'],
     'gi-g': ['temperature','temperature_enable']
   };
   const fields = paramMap[prefix] || [];

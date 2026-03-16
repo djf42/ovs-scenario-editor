@@ -42,7 +42,7 @@
     "mac": {
       "category": "public.app-category.education",
       "target": [
-        { "target": "dmg", "arch": ["x64", "arm64"] }
+        { "target": "dmg", "arch": ["universal"] }
       ]
     },
 

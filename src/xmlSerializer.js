@@ -287,17 +287,23 @@ function serializeGeneral(g) {
   return wrapBlock('general', g, ['temperature', 'temperature_enable']);
 }
 
+function safeVal(v) {
+  // Collapse any accidental arrays to a single scalar value
+  if (Array.isArray(v)) v = v[v.length - 1];
+  return v;
+}
+
 function wrapBlock(tag, obj, order) {
   const lines = [`<${tag}>`];
   for (const key of order) {
     if (obj[key] !== undefined) {
-      lines.push(`    <${key}>${obj[key]}</${key}>`);
+      lines.push(`    <${key}>${safeVal(obj[key])}</${key}>`);
     }
   }
   // Any extra keys not in order
   for (const key of Object.keys(obj)) {
     if (!order.includes(key)) {
-      lines.push(`    <${key}>${obj[key]}</${key}>`);
+      lines.push(`    <${key}>${safeVal(obj[key])}</${key}>`);
     }
   }
   lines.push(`</${tag}>`);
