@@ -5,6 +5,13 @@ node_modules/
 dist/
 out/
 
+# Archives and built installers (too large for GitHub)
+*.zip
+*.dmg
+*.pkg
+*.exe
+*.AppImage
+
 # Scenario files (user data — not part of the app source)
 *.xml
 layout.json
