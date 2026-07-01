@@ -17,8 +17,9 @@
     "vis-network":     "^9.1.9"
   },
   "devDependencies": {
-    "electron":         "^29.1.0",
-    "electron-builder": "^24.13.3"
+    "electron":           "^29.1.0",
+    "electron-builder":   "^24.13.3",
+    "@electron/notarize": "^2.3.0"
   },
   "build": {
     "appId":       "com.openvetsim.editor",
@@ -39,17 +40,30 @@
       "output": "dist"
     },
 
+    "afterSign": "scripts/notarize.js",
+
     "mac": {
       "category": "public.app-category.education",
+      "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": false,
       "target": [
         { "target": "dmg", "arch": ["universal"] }
       ]
     },
 
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         { "target": "nsis", "arch": ["x64"] }
       ]
+    },
+
+    "linux": {
+      "icon": "build/icon.png"
     },
 
     "nsis": {

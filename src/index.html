@@ -6,7 +6,7 @@
   <title>OVS Scenario Editor</title>
   <link rel="stylesheet" href="styles.css" />
   <!-- vis-network standalone UMD (creates global `vis`) -->
-  <script src="../node_modules/vis-network/standalone/umd/vis-network.min.js"></script>
+  <script src="../node_modules/vis-network/standalone/umd/vis-network.js"></script>
 </head>
 <body>
 
@@ -16,9 +16,10 @@
   <header id="topbar">
     <div id="topbar-left">
       <div id="logo">OVS <span>Editor</span></div>
-      <button id="btn-new"  class="tb-btn">⊕ New</button>
-      <button id="btn-open" class="tb-btn">📂 Open</button>
-      <button id="btn-save" class="tb-btn tb-save">💾 Save</button>
+      <button id="btn-new"   class="tb-btn">⊕ New</button>
+      <button id="btn-open"  class="tb-btn">📂 Open</button>
+      <button id="btn-save"  class="tb-btn tb-save">💾 Save</button>
+      <button id="btn-close" class="tb-btn tb-close">✕ Close</button>
     </div>
 
     <nav id="tab-nav">

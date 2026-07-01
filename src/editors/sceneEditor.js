@@ -171,7 +171,6 @@ class SceneEditor {
 
   <!-- Actions -->
   <section class="se-section se-actions">
-    <button id="se-apply" class="btn-primary">✔ Apply Changes</button>
     <button id="se-delete" class="btn-danger">🗑 Delete Scene</button>
   </section>
 
@@ -284,6 +283,12 @@ class SceneEditor {
 
   // ── Listeners ──────────────────────────────────────────────────────────────
 
+  // Debounced auto-apply: schedule a silent apply 400 ms after the last change.
+  _scheduleAutoApply() {
+    clearTimeout(this._autoApplyTimer);
+    this._autoApplyTimer = setTimeout(() => this._applyChanges(true), 400);
+  }
+
   _attachListeners() {
     // Close panel
     this.container.querySelector('#se-close').addEventListener('click', () => {
@@ -305,6 +310,7 @@ class SceneEditor {
     const timeoutCb = this.container.querySelector('#se-timeout-en');
     timeoutCb.addEventListener('change', () => {
       this.container.querySelector('#timeout-body').classList.toggle('hidden', !timeoutCb.checked);
+      this._scheduleAutoApply();
     });
 
     // Param checkboxes enable/disable their inputs
@@ -314,6 +320,7 @@ class SceneEditor {
         const inp = this.container.querySelector(
           `[data-field="${field}"][data-group="${group}"]:not(.param-cb)`);
         if (inp) inp.disabled = !cb.checked;
+        this._scheduleAutoApply();
       });
     });
 
@@ -328,6 +335,7 @@ class SceneEditor {
         if (wfSel && cntSel && hidden) {
           hidden.value = encodeVpcValue(wfSel.value, cntSel.value);
         }
+        this._scheduleAutoApply();
       };
       this.container.querySelector('[data-vpc-part="waveform"]')
         ?.addEventListener('change', syncVpcHidden);
@@ -336,11 +344,17 @@ class SceneEditor {
       vpcCb.addEventListener('change', () => {
         const dis = !vpcCb.checked;
         this.container.querySelectorAll('[data-vpc-part]').forEach(s => s.disabled = dis);
+        this._scheduleAutoApply();
       });
     }
 
-    // Apply button
-    this.container.querySelector('#se-apply').addEventListener('click', () => this._applyChanges());
+    // Auto-apply on all text/number inputs and selects in the panel
+    this.container.querySelectorAll('input[type="text"], input[type="number"]').forEach(inp => {
+      inp.addEventListener('input', () => this._scheduleAutoApply());
+    });
+    this.container.querySelectorAll('select').forEach(sel => {
+      sel.addEventListener('change', () => this._scheduleAutoApply());
+    });
 
     // Delete button
     this.container.querySelector('#se-delete').addEventListener('click', () => {
@@ -355,7 +369,7 @@ class SceneEditor {
     });
   }
 
-  _applyChanges() {
+  _applyChanges(silent = false) {
     const title = this.container.querySelector('#se-title').value.trim();
     const id    = parseInt(this.container.querySelector('#se-id').value, 10);
 
@@ -367,8 +381,9 @@ class SceneEditor {
         `[data-field="${field}"][data-group="${group}"]:not(.param-cb)`);
       if (inp && group) {
         const raw = inp.value;
-        const num = parseFloat(raw);
-        init[group][field] = isNaN(num) ? raw : num;
+        // Use strict numeric test so compound values like "1-1" (VPC) are kept as strings
+        const isNumeric = /^-?\d+(\.\d+)?$/.test(raw.trim());
+        init[group][field] = isNumeric ? parseFloat(raw) : raw;
       }
     });
 
@@ -390,7 +405,7 @@ class SceneEditor {
     };
 
     this.scene = updated;
-    this.onChangeCb(updated, 'update', this._originalId);
+    this.onChangeCb(updated, 'update', this._originalId, silent);
     this._originalId = updated.id; // update for subsequent applies
   }
 

@@ -39,9 +39,10 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 // ── Toolbar buttons ───────────────────────────────────────────────────────────
 
-document.getElementById('btn-new').addEventListener('click',  cmdNew);
-document.getElementById('btn-open').addEventListener('click', cmdOpen);
-document.getElementById('btn-save').addEventListener('click', cmdSave);
+document.getElementById('btn-new').addEventListener('click',   cmdNew);
+document.getElementById('btn-open').addEventListener('click',  cmdOpen);
+document.getElementById('btn-save').addEventListener('click',  cmdSave);
+document.getElementById('btn-close').addEventListener('click', cmdClose);
 document.getElementById('btn-add-scene').addEventListener('click', cmdAddScene);
 document.getElementById('btn-fit').addEventListener('click',  () => flowChart.fit());
 document.getElementById('btn-bug').addEventListener('click',  () =>
@@ -112,8 +113,29 @@ flowChart.on('positionsChanged', async (positions) => {
 
 // ── Commands ──────────────────────────────────────────────────────────────────
 
+/**
+ * If there are unsaved changes, show a native Save / Don't Save / Cancel dialog.
+ * Returns true if the caller should proceed, false if the user cancelled.
+ */
+async function confirmUnsavedChanges() {
+  if (!isDirty) return true;
+  const response = await ipcRenderer.invoke('dialog:confirmUnsaved');
+  if (response === 0) {      // Save
+    await cmdSave();
+    return true;
+  }
+  return response === 1;     // true = Don't Save (proceed), false = Cancel
+}
+
+// Handle window close button / Quit menu when there are unsaved changes
+ipcRenderer.on('app:closeRequested', async () => {
+  if (await confirmUnsavedChanges()) {
+    ipcRenderer.send('app:quit');
+  }
+});
+
 async function cmdNew() {
-  if (isDirty && !confirm('You have unsaved changes. Create a new scenario anyway?')) return;
+  if (!await confirmUnsavedChanges()) return;
 
   // Ask the user to pick (or create) the folder that will hold this scenario.
   // The handler also scaffolds images/, vocals/, media/ and seeds stock-dog.jpg.
@@ -132,7 +154,7 @@ async function cmdNew() {
 }
 
 async function cmdOpen() {
-  if (isDirty && !confirm('You have unsaved changes. Open a different scenario anyway?')) return;
+  if (!await confirmUnsavedChanges()) return;
   const result = await ipcRenderer.invoke('dialog:openFolder');
   if (!result) return;
   try {
@@ -200,6 +222,29 @@ async function cmdSaveAs() {
   }
 }
 
+async function cmdClose() {
+  if (!scenario) return;
+  if (!await confirmUnsavedChanges()) return;
+
+  scenario = null;
+  isDirty  = false;
+
+  // Return editors to their placeholder state
+  document.getElementById('header-editor').innerHTML =
+    '<div class="empty-page"><p>Open or create a scenario to edit its information.</p></div>';
+  document.getElementById('events-editor').innerHTML =
+    '<div class="empty-page"><p>Open or create a scenario to edit its events.</p></div>';
+
+  // Show the opening screen
+  document.getElementById('canvas-empty').classList.remove('hidden');
+  hideSceneEditor();
+  switchToTab('flowchart');
+  setStatus('Ready — open a scenario folder to begin.');
+  document.getElementById('fp-display').textContent = '';
+  document.getElementById('scene-count').textContent = '0 scenes';
+  ipcRenderer.send('app:resetTitle');
+}
+
 function cmdAddScene() {
   if (!scenario) { alert('Please create or open a scenario first.'); return; }
   const maxId = Math.max(0, ...scenario.scenes.filter(s => s.id < 100).map(s => s.id));
@@ -227,7 +272,7 @@ function cmdAddScene() {
 
 // ── Scene editor callbacks ────────────────────────────────────────────────────
 
-function onSceneChanged(updatedScene, action, originalId) {
+function onSceneChanged(updatedScene, action, originalId, silent = false) {
   if (!scenario) return;
   if (action === 'delete') {
     deleteScene(updatedScene.id);
@@ -241,20 +286,20 @@ function onSceneChanged(updatedScene, action, originalId) {
   }
   markDirty();
   flowChart.refresh(scenario);
-  showToast('Scene updated ✔');
+  if (!silent) showToast('Scene updated ✔');
 }
 
-function onHeaderChanged(updatedScenario) {
+function onHeaderChanged(updatedScenario, silent = false) {
   scenario = updatedScenario;
   markDirty();
-  showToast('Scenario info updated ✔');
+  if (!silent) showToast('Scenario info updated ✔');
 }
 
-function onEventsChanged(events) {
+function onEventsChanged(events, silent = false) {
   if (!scenario) return;
   scenario.events = events;
   markDirty();
-  showToast('Events updated ✔');
+  if (!silent) showToast('Events updated ✔');
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -386,8 +431,8 @@ function createEmptyScenario() {
         ]
       }
     },
-    vocals: [],
-    media:  [],
+    vocals: [{ filename: 'default-vocal.wav', title: 'Default' }],
+    media:  [{ filename: 'default-media.jpg', title: 'Default' }],
     events: [
       { name: 'navigation', title: 'Navigation', events: [
         { title: 'Advance', id: 'advance', priority: 0, hotkey: '2' },

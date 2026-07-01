@@ -33,10 +33,6 @@ class EventsEditor {
   </div>
 
   <button class="btn-add btn-primary" id="add-cat">+ Add Category</button>
-
-  <div class="card" style="margin-top:16px">
-    <button id="ev-apply" class="btn-primary">✔ Apply Changes</button>
-  </div>
 </div>`;
   }
 
@@ -104,15 +100,29 @@ class EventsEditor {
 </tr>`;
   }
 
+  // Debounced auto-apply — 400 ms after the last change
+  _scheduleAutoApply() {
+    clearTimeout(this._autoApplyTimer);
+    this._autoApplyTimer = setTimeout(() => this._applyChanges(true), 400);
+  }
+
   _attachListeners() {
+    // Add category — apply immediately after structural change
     this.container.querySelector('#add-cat').addEventListener('click', () => {
       this.scenario.events = this.scenario.events || [];
       this.scenario.events.push({ name: '', title: '', events: [] });
       this.container.querySelector('#cat-list').innerHTML =
         (this.scenario.events || []).map((c, i) => this._buildCategory(c, i)).join('');
+      this._applyChanges(true);
     });
 
-    this.container.querySelector('#ev-apply').addEventListener('click', () => this._applyChanges());
+    // Auto-apply on any input/select change (event delegation covers dynamically added rows)
+    this.container.addEventListener('input',  (e) => {
+      if (e.target.matches('input')) this._scheduleAutoApply();
+    });
+    this.container.addEventListener('change', (e) => {
+      if (e.target.matches('select')) this._scheduleAutoApply();
+    });
   }
 
   deleteCat(ci) {
@@ -120,6 +130,7 @@ class EventsEditor {
     this.scenario.events.splice(ci, 1);
     this.container.querySelector('#cat-list').innerHTML =
       (this.scenario.events || []).map((c, i) => this._buildCategory(c, i)).join('');
+    this._applyChanges(true);
   }
 
   addEvent(ci) {
@@ -132,6 +143,7 @@ class EventsEditor {
       const ei = cat.events.length - 1;
       tbody.insertAdjacentHTML('beforeend', this._buildEventRow(cat.events[ei], ci, ei));
     }
+    this._applyChanges(true);
   }
 
   deleteEvent(ci, ei) {
@@ -142,9 +154,10 @@ class EventsEditor {
       tbody.innerHTML = (this.scenario.events[ci].events || []).map((ev, i) =>
         this._buildEventRow(ev, ci, i)).join('');
     }
+    this._applyChanges(true);
   }
 
-  _applyChanges() {
+  _applyChanges(silent = false) {
     const events = [];
 
     this.container.querySelectorAll('.ev-cat').forEach(catEl => {
@@ -166,8 +179,7 @@ class EventsEditor {
     });
 
     this.scenario.events = events;
-    this.onChangeCb(events);
-    showToast('Events saved.');
+    this.onChangeCb(events, silent);
   }
 }
 

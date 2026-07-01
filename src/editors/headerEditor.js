@@ -174,9 +174,6 @@ class HeaderEditor {
     </div>
   </div>
 
-  <div class="card">
-    <button id="h-apply" class="btn-primary">✔ Apply All Changes</button>
-  </div>
 </div>`;
   }
 
@@ -194,6 +191,12 @@ class HeaderEditor {
 </div>`).join('');
   }
 
+  // Debounced auto-apply — 400 ms after the last change
+  _scheduleAutoApply() {
+    clearTimeout(this._autoApplyTimer);
+    this._autoApplyTimer = setTimeout(() => this._applyChanges(true), 400);
+  }
+
   _attachListeners() {
     window.__headerEditor = this;
 
@@ -208,24 +211,32 @@ class HeaderEditor {
       });
     });
 
-    // Add vocal
+    // Auto-apply on any input/select/textarea change (covers current and future rows
+    // added dynamically, via event delegation on the container)
+    this.container.addEventListener('input',  (e) => {
+      if (e.target.matches('input, textarea')) this._scheduleAutoApply();
+    });
+    this.container.addEventListener('change', (e) => {
+      if (e.target.matches('select')) this._scheduleAutoApply();
+    });
+
+    // Add vocal — apply immediately after structural change
     this.container.querySelector('#add-vocal').addEventListener('click', () => {
       this.scenario.vocals = this.scenario.vocals || [];
       this.scenario.vocals.push({ filename: '', title: '' });
       this.container.querySelector('#vocals-list').innerHTML =
         this._buildFileList(this.scenario.vocals, 'vocal');
+      this._applyChanges(true);
     });
 
-    // Add media
+    // Add media — apply immediately after structural change
     this.container.querySelector('#add-media').addEventListener('click', () => {
       this.scenario.media = this.scenario.media || [];
       this.scenario.media.push({ filename: '', title: '' });
       this.container.querySelector('#media-list').innerHTML =
         this._buildFileList(this.scenario.media, 'media');
+      this._applyChanges(true);
     });
-
-    // Apply
-    this.container.querySelector('#h-apply').addEventListener('click', () => this._applyChanges());
   }
 
   removeFile(type, index) {
@@ -238,6 +249,7 @@ class HeaderEditor {
       this.container.querySelector('#media-list').innerHTML =
         this._buildFileList(this.scenario.media, 'media');
     }
+    this._applyChanges(true);
   }
 
   /** Opens a file picker in the scenario's vocals/ or media/ subfolder. */
@@ -253,9 +265,10 @@ class HeaderEditor {
     const filename = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
     if (!filename) return;
 
-    // Update the matching filename input in the DOM
+    // Update the matching filename input in the DOM then auto-apply
     const input = this.container.querySelector(`.file-name[data-type="${type}"][data-idx="${index}"]`);
     if (input) input.value = filename;
+    this._scheduleAutoApply();
   }
 
   /** Opens a file picker in the scenario's images/ subfolder for the avatar. */
@@ -270,6 +283,7 @@ class HeaderEditor {
     if (!filename) return;
     const input = this.container.querySelector('#av-file');
     if (input) input.value = filename;
+    this._scheduleAutoApply();
   }
 
   /** Opens a file picker in the scenario's images/ subfolder for the patient image. */
@@ -287,9 +301,10 @@ class HeaderEditor {
 
     const input = this.container.querySelector('#sm-image');
     if (input) input.value = filename;
+    this._scheduleAutoApply();
   }
 
-  _applyChanges() {
+  _applyChanges(silent = false) {
     const g = (id) => this.container.querySelector(`#${id}`);
 
     // Header
@@ -345,8 +360,7 @@ class HeaderEditor {
       this.scenario.media.push({ filename: inp.value.trim(), title: titleInp?.value.trim() || '' });
     });
 
-    this.onChangeCb(this.scenario);
-    showToast('Scenario info saved.');
+    this.onChangeCb(this.scenario, silent);
   }
 }
 

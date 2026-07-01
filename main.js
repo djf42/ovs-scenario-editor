@@ -5,6 +5,7 @@ const fs = require('fs');
 let mainWindow;
 let currentFilePath = null;
 let currentFolderPath = null;
+let allowClose = false; // set to true only after renderer confirms it's safe to quit
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -21,6 +22,14 @@ function createWindow() {
   });
 
   mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
+
+  // Intercept the close button / Cmd+Q so renderer can prompt about unsaved changes
+  mainWindow.on('close', (e) => {
+    if (!allowClose) {
+      e.preventDefault();
+      mainWindow.webContents.send('app:closeRequested');
+    }
+  });
 
   buildMenu();
 }
@@ -253,6 +262,20 @@ ipcMain.handle('dialog:newScenarioFolder', async () => {
     fs.copyFileSync(assetSrc, assetDst);
   }
 
+  // Seed the default vocal file
+  const vocalSrc = path.join(__dirname, 'assets', 'default-vocal.wav');
+  const vocalDst = path.join(folderPath, 'vocals', 'default-vocal.wav');
+  if (fs.existsSync(vocalSrc) && !fs.existsSync(vocalDst)) {
+    fs.copyFileSync(vocalSrc, vocalDst);
+  }
+
+  // Seed the default media file
+  const mediaSrc = path.join(__dirname, 'assets', 'default-media.jpg');
+  const mediaDst = path.join(folderPath, 'media', 'default-media.jpg');
+  if (fs.existsSync(mediaSrc) && !fs.existsSync(mediaDst)) {
+    fs.copyFileSync(mediaSrc, mediaDst);
+  }
+
   currentFolderPath = folderPath;
   currentFilePath   = path.join(folderPath, 'main.xml');
   mainWindow.setTitle(`OVS Scenario Editor — ${path.basename(folderPath)}`);
@@ -280,6 +303,33 @@ ipcMain.handle('dialog:pickFile', async (_event, startDir, filters) => {
 
   if (result.canceled || !result.filePaths.length) return null;
   return path.basename(result.filePaths[0]);
+});
+
+// ── Unsaved-changes dialog + graceful quit ────────────────────────────────────
+
+// Renderer calls this to show a native Save / Don't Save / Cancel prompt
+ipcMain.handle('dialog:confirmUnsaved', async () => {
+  const { response } = await dialog.showMessageBox(mainWindow, {
+    type:      'question',
+    buttons:   ['Save', "Don't Save", 'Cancel'],
+    defaultId: 0,
+    cancelId:  2,
+    message:   'You have unsaved changes',
+    detail:    'Do you want to save your changes before continuing?'
+  });
+  return response; // 0 = Save, 1 = Don't Save, 2 = Cancel
+});
+
+// Renderer calls this once it has finished saving (or chosen not to save)
+ipcMain.on('app:quit', () => {
+  app.exit(0);
+});
+
+// Renderer calls this when a scenario is closed to reset the window title
+ipcMain.on('app:resetTitle', () => {
+  if (mainWindow) mainWindow.setTitle('OVS Scenario Editor');
+  currentFilePath   = null;
+  currentFolderPath = null;
 });
 
 // ── App lifecycle ────────────────────────────────────────────────────────────
