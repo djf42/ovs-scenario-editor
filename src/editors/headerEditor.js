@@ -6,6 +6,7 @@
 
 const { ipcRenderer } = require('electron');
 const path = require('path');
+const fs   = require('fs');
 
 class HeaderEditor {
   constructor(containerId, onChangeCb) {
@@ -252,6 +253,29 @@ class HeaderEditor {
     this._applyChanges(true);
   }
 
+  /**
+   * Copies `fullPath` into the scenario's `subdir` folder if it isn't already there.
+   * Returns just the basename (what gets stored in the XML).
+   */
+  _copyToSubdir(fullPath, subdir) {
+    const folderPath = this.scenario?._folderPath;
+    if (!folderPath) return path.basename(fullPath);
+
+    const destDir  = path.join(folderPath, subdir);
+    const basename = path.basename(fullPath);
+    const destPath = path.join(destDir, basename);
+
+    // Create the subfolder if it doesn't exist yet
+    if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true });
+
+    // Only copy if the source and destination are different files
+    if (path.resolve(fullPath) !== path.resolve(destPath)) {
+      fs.copyFileSync(fullPath, destPath);
+    }
+
+    return basename;
+  }
+
   /** Opens a file picker in the scenario's vocals/ or media/ subfolder. */
   async browseFile(type, index) {
     const folderPath = this.scenario?._folderPath;
@@ -262,8 +286,10 @@ class HeaderEditor {
       ? [{ name: 'Audio Files', extensions: ['wav', 'mp3', 'ogg', 'm4a', 'aiff'] }, { name: 'All Files', extensions: ['*'] }]
       : [{ name: 'Media Files', extensions: ['mp4', 'mov', 'avi', 'webm', 'jpg', 'jpeg', 'png', 'gif'] }, { name: 'All Files', extensions: ['*'] }];
 
-    const filename = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
-    if (!filename) return;
+    const fullPath = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
+    if (!fullPath) return;
+
+    const filename = this._copyToSubdir(fullPath, subdir);
 
     // Update the matching filename input in the DOM then auto-apply
     const input = this.container.querySelector(`.file-name[data-type="${type}"][data-idx="${index}"]`);
@@ -279,8 +305,9 @@ class HeaderEditor {
       { name: 'Image Files', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] },
       { name: 'All Files', extensions: ['*'] }
     ];
-    const filename = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
-    if (!filename) return;
+    const fullPath = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
+    if (!fullPath) return;
+    const filename = this._copyToSubdir(fullPath, 'images');
     const input = this.container.querySelector('#av-file');
     if (input) input.value = filename;
     this._scheduleAutoApply();
@@ -290,15 +317,13 @@ class HeaderEditor {
   async browseImage() {
     const folderPath = this.scenario?._folderPath;
     const startDir = folderPath ? path.join(folderPath, 'images') : null;
-
     const filters = [
       { name: 'Image Files', extensions: ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'] },
       { name: 'All Files', extensions: ['*'] }
     ];
-
-    const filename = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
-    if (!filename) return;
-
+    const fullPath = await ipcRenderer.invoke('dialog:pickFile', startDir, filters);
+    if (!fullPath) return;
+    const filename = this._copyToSubdir(fullPath, 'images');
     const input = this.container.querySelector('#sm-image');
     if (input) input.value = filename;
     this._scheduleAutoApply();

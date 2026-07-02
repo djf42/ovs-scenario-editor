@@ -409,7 +409,7 @@ function createEmptyScenario() {
       description: ''
     },
     profile: {
-      avatar:   { filename: 'stock-dog.jpg', height_pct: 100, width_pct: 100 },
+      avatar:   { filename: 'stock-dog.jpg', height_pct: 100, width_pct: 50 },
       summary:  { description: '', breed: '', sex: '', weight: '', complaint: '', image: '', species: 'Canine' },
       controls: {
         color: '#000000',

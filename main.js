@@ -302,7 +302,7 @@ ipcMain.handle('dialog:pickFile', async (_event, startDir, filters) => {
   });
 
   if (result.canceled || !result.filePaths.length) return null;
-  return path.basename(result.filePaths[0]);
+  return result.filePaths[0]; // return full path so renderer can copy if needed
 });
 
 // ── Unsaved-changes dialog + graceful quit ────────────────────────────────────
