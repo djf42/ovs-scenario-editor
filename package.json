@@ -57,6 +57,7 @@
 
     "win": {
       "icon": "build/icon.ico",
+      "sign": "scripts/sign-windows.js",
       "target": [
         { "target": "nsis", "arch": ["x64"] }
       ]
