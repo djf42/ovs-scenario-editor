@@ -17,8 +17,9 @@ const path         = require('path');
 exports.default = async function(configuration) {
   const filePath = configuration.path;
 
-  // Only sign executables and DLLs
-  if (!filePath.endsWith('.exe') && !filePath.endsWith('.dll')) return;
+  // Only sign executables — skip DLLs (Electron/Chromium runtime libs that
+  // don't affect SmartScreen reputation and would otherwise each require a PIN prompt)
+  if (!filePath.endsWith('.exe')) return;
 
   const certName = process.env.WIN_CERT_SUBJECT_NAME;
   if (!certName) {
