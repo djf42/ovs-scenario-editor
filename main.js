@@ -1,6 +1,7 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { version } = require('./package.json');
 
 let mainWindow;
 let currentFilePath = null;
@@ -107,7 +108,7 @@ function buildMenu() {
               type: 'info',
               title: 'About OVS Scenario Editor',
               message: 'OVS Scenario Editor',
-              detail: 'OpenVetSim XML Scenario Editor\nVersion 1.0.0\n\nCreate and edit veterinary patient simulator scenarios.'
+              detail: `OpenVetSim XML Scenario Editor\nVersion ${version}\n\nCreate and edit veterinary patient simulator scenarios.`
             });
           }
         }
