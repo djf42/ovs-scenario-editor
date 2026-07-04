@@ -72,7 +72,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut":          true,
       "createStartMenuShortcut":        true,
-      "shortcutName":                   "OVS Scenario Editor"
+      "shortcutName":                   "OVS Scenario Editor",
+      "include":                        "build/installer.nsh"
     }
   }
 }
